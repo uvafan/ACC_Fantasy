@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 
+YEAR = '20'
+PREV_YEAR = '19'
+ACC_GAMES = 20
+
 def main():
     df = pd.read_csv('players.csv')
     df = generatePredictions(df)
@@ -10,22 +14,37 @@ def main():
 
 def generatePredictions(df):
     for i,row in df.iterrows():
+        baseline = row['MP']
+        if row['ACC_G'] > 0:
+            ACC_MPG = row['ACC_MP'] / row['ACC_G']
+            baseline = (baseline + ACC_MPG) / 2
         if np.isnan(row['MinKP120']):
-            df.at[i,'PredMin'] = row['MP']
+            df.at[i,'PredMin'] = baseline
         else:
-            df.at[i,'PredMin'] = (row['MinKP120']*2+row['MP'])/3
+            df.at[i,'PredMin'] = (row['MinKP120'] + baseline)/2
     for i,row in df.iterrows():
         if np.isnan(row['PredMin']):
             continue
-        m19 = row['MP']*row['G19']
-        m18 = row['Min18']*row['G18']
+        m = row['MP']*row[f'G{YEAR}']
+        mPrev = row[f'Min{PREV_YEAR}']*row[f'G{PREV_YEAR}']
         for cat in ['Pts','Reb','Ast']:
-            c19 = row[cat]*row['G19']
-            c18 = row[cat+'18']*row['G18']
-            if np.isnan(m18):
-                df.at[i,'Pred'+cat]=(c19/m19)*row['PredMin']
+            c = row[cat]*row[f'G{YEAR}']
+            cPrev = row[cat+PREV_YEAR]*row[f'G{PREV_YEAR}']
+            if np.isnan(mPrev):
+                if m == 0:
+                    df.at[i,'Pred'+cat] = 0
+                else:
+                    df.at[i,'Pred'+cat]=(c/m)*row['PredMin']
             else:
-                df.at[i,'Pred'+cat]=((c19*3+c18)/(m19*3+m18))*row['PredMin']
+                if m == 0 and mPrev == 0:
+                    df.at[i,'Pred'+cat] = 0
+                else:
+                    df.at[i,'Pred'+cat]=((c*3+cPrev)/(m*3+mPrev))*row['PredMin']
+            # Adjust for games already played
+            cACC = row[f'ACC_{cat}']
+            gACC = row['ACC_G']
+            cur_pred = df.at[i, f'Pred{cat}']
+            df.at[i, f'Pred{cat}'] = (cur_pred * (ACC_GAMES - gACC) + cACC) / ACC_GAMES
     return df[~np.isnan(df['PredPts'])]
 
 def generateValues(df):
