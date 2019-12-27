@@ -39,7 +39,7 @@ def generatePredictions(df):
                 if m == 0 and mPrev == 0:
                     df.at[i,'Pred'+cat] = 0
                 else:
-                    df.at[i,'Pred'+cat]=((c*3+cPrev)/(m*3+mPrev))*row['PredMin']
+                    df.at[i,'Pred'+cat]=(c/m)*row['PredMin']
             # Adjust for games already played
             cACC = row[f'ACC_{cat}']
             gACC = row['ACC_G']
