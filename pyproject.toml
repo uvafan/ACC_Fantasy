@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "acc_fantasy"
+version = "0.1.0"
+description = ""
+authors = ["Eli Lifland <eli.d.lifland@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+bs4 = "^0.0.1"
+pandas = "^1.1.5"
+lxml = "^4.6.2"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

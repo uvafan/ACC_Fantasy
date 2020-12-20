@@ -3,8 +3,8 @@ from urllib.request import urlopen
 import pandas as pd
 import numpy as np
 
-YEAR = '20'
-PREV_YEAR = '19'
+YEAR = '21'
+PREV_YEAR = '20'
 
 ACC_Teams_SR = ['Louisville', 'Duke', 'Virginia', 'UNC', 'Georgia Tech', 'Boston College', 'Pitt', 'Virginia Tech', 'Florida State', 'NC State', 'Notre Dame', 'Clemson', 'Miami (FL)', 'Wake Forest', 'Syracuse']
 
@@ -16,8 +16,6 @@ def main():
         df = loadTeam(team,df,kp120teams)
         print(df)
     df.to_csv('players.csv',index=False)
-    #by drafted position, primary position
-    #whether or not they made majors
 
 def getKP120():
     url = 'https://kenpom.com'
@@ -31,7 +29,7 @@ def getKP120():
     return kp120teams 
 
 def loadTeam(team,df,kp120teams):
-    url = 'https://www.sports-reference.com/cbb/schools/{}/2020.html'.format(team)
+    url = 'https://www.sports-reference.com/cbb/schools/{}/20{}.html'.format(team, YEAR)
     soup = BeautifulSoup(urlopen(url),features='lxml')
     count = 0
     for tr in soup.findAll('tr')[1:]:
@@ -71,7 +69,7 @@ def loadTeam(team,df,kp120teams):
                 reb = float(data[19])
                 ast = float(data[20])
                 pts = float(data[25])
-            elif year == PREV_YEAR and len(data) > 25:
+            elif year == PREV_YEAR and len(data) > 25 and float(data[2]) > 0:
                 gPrev = float(data[2])
                 minPrev = float(data[4])
                 rebPrev = float(data[19])
